@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        .status { text-align: center; color: #28a745; font-weight: bold; margin-bottom: 20px; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #eee; margin: 5px 0; padding: 10px; border-radius: 4px; display: flex; justify-content: space-between;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TaskMaster Pro</h1>
+        <div id="db-status" class="status">Connecting to Database...</div>
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        // Fetch data from our PHP API
+        fetch('http://localhost:8080/tasks')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('db-status').innerText = data.message;
+                const taskList = document.getElementById('task-list');
+                
+                // Loop through the tasks and display them
+                if (data.tasks) {
+                    data.tasks.forEach(task => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span>${task.task}</span> <strong>${task.status}</strong>`;
+                        taskList.appendChild(li);
+                    });
+                }
+            })
+            .catch(error => {
+                document.getElementById('db-status').innerText = 'API Connection Failed ❌';
+                document.getElementById('db-status').style.color = 'red';
+            });
+    </script>
+</body>
+</html>

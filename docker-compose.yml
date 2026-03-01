@@ -1,7 +1,13 @@
-version: '3.8'
-
 services:
-  # 1. Our PHP API Service
+  # 1. Our Nginx Frontend (New!)
+  web:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  # 2. Our PHP API Service
   api:
     build: .
     ports:
@@ -14,7 +20,7 @@ services:
     depends_on:
       - db
 
-  # 2. Our MySQL Database Service
+  # 3. Our MySQL Database Service
   db:
     image: mysql:8.0
     environment:
@@ -27,6 +33,6 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
-# 3. Persistent Storage
+# Persistent Storage for the DB
 volumes:
   db_data:

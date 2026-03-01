@@ -1,6 +1,10 @@
 <?php
-// Set headers to strictly return JSON
+// Set headers to strictly return JSON and allow Cross-Origin requests (CORS)
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *'); // The magic line that allows the frontend to connect
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
 
 // Get the requested URI
 $request_uri = $_SERVER['REQUEST_URI'];
