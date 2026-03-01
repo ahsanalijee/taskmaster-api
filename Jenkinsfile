@@ -1,8 +1,9 @@
 pipeline {
     agent any
     
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+    // We define a variable for the build tag to keep the code clean
+    environment {
+        BUILD_TAG = "v${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -12,29 +13,31 @@ pipeline {
             }
         }
         
-        stage('Build API Image') {
+        stage('Build & Push API') {
             steps {
                 script {
-                    // Use your actual Docker Hub username here
-                    docker.build("ahsanali250/taskmaster-api:latest", "-f Dockerfile .")
-                }
-            }
-        }
-
-        stage('Push to Hub') {
-            steps {
-                script {
-                    // This uses the Credential ID we created in Step 1
                     docker.withRegistry('', 'docker-hub-credentials') {
-                        docker.image("ahsanali250/taskmaster-api:latest").push()
+                        // We build the image once
+                        def apiImage = docker.build("ahsanali250/taskmaster-api", "-f Dockerfile .")
+                        
+                        // We push two tags: the specific build version and 'latest'
+                        apiImage.push("${env.BUILD_TAG}")
+                        apiImage.push("latest")
                     }
                 }
             }
         }
-        
-        stage('Security Scan') {
+
+        stage('Build & Push Frontend') {
             steps {
-                echo 'In a future step, we will add Trivy here to scan for vulnerabilities!'
+                script {
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        def webImage = docker.build("ahsanali250/taskmaster-web", "-f frontend/Dockerfile ./frontend")
+                        
+                        webImage.push("${env.BUILD_TAG}")
+                        webImage.push("latest")
+                    }
+                }
             }
         }
     }
