@@ -1,7 +1,6 @@
 pipeline {
     agent any
     
-    // This allows Jenkins to use the Docker socket we shared with it
     options {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
@@ -9,7 +8,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pulls your latest code from the GitHub branch
                 checkout scm
             }
         }
@@ -17,8 +15,19 @@ pipeline {
         stage('Build API Image') {
             steps {
                 script {
-                    // Builds your image just like you did manually
+                    // Use your actual Docker Hub username here
                     docker.build("ahsanali250/taskmaster-api:latest", "-f Dockerfile .")
+                }
+            }
+        }
+
+        stage('Push to Hub') {
+            steps {
+                script {
+                    // This uses the Credential ID we created in Step 1
+                    docker.withRegistry('', 'docker-hub-credentials') {
+                        docker.image("ahsanali250/taskmaster-api:latest").push()
+                    }
                 }
             }
         }
