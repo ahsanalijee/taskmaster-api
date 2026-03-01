@@ -1,14 +1,21 @@
 pipeline {
     agent any
     
-    // We define a variable for the build tag to keep the code clean
+    options {
+        // Keeps only the last 5 build logs to save space
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+
     environment {
+        // Automatically uses the Jenkins build number as a version tag
         BUILD_TAG = "v${env.BUILD_NUMBER}"
+        DOCKER_USER = "ahsanali250"
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Pulls the latest code from your GitHub repository
                 checkout scm
             }
         }
@@ -17,10 +24,10 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-credentials') {
-                        // We build the image once
-                        def apiImage = docker.build("ahsanali250/taskmaster-api", "-f Dockerfile .")
+                        // Builds the API image from the root Dockerfile
+                        def apiImage = docker.build("${DOCKER_USER}/taskmaster-api", "-f Dockerfile .")
                         
-                        // We push two tags: the specific build version and 'latest'
+                        // Pushes both the versioned tag and 'latest' to the warehouse
                         apiImage.push("${env.BUILD_TAG}")
                         apiImage.push("latest")
                     }
@@ -32,12 +39,26 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-credentials') {
-                        def webImage = docker.build("ahsanali250/taskmaster-web", "-f frontend/Dockerfile ./frontend")
+                        // Builds the Frontend image from the subfolder
+                        def webImage = docker.build("${DOCKER_USER}/taskmaster-web", "-f frontend/Dockerfile ./frontend")
                         
+                        // Pushes both tags to Docker Hub
                         webImage.push("${env.BUILD_TAG}")
                         webImage.push("latest")
                     }
                 }
+            }
+        }
+    }
+
+    // This section runs automatically after the stages finish
+    post {
+        always {
+            script {
+                // Cleans up local images to prevent your Mac from filling up
+                sh "docker rmi ${DOCKER_USER}/taskmaster-api:${env.BUILD_TAG} || true"
+                sh "docker rmi ${DOCKER_USER}/taskmaster-web:${env.BUILD_TAG} || true"
+                echo "Cleanup complete: Local versioned images removed."
             }
         }
     }
