@@ -32,7 +32,7 @@ if ($request_uri === '/tasks') {
         
         http_response_code(200);
         echo json_encode([
-            "message" => "Successfully connected to MySQL database at $db_host! 🚀",
+            "message" => "Connection to MySQL database  is successful at $db_host! 🚀",
             "status" => "Microservices are talking to each other!"
         ]);
     } catch (PDOException $e) {
