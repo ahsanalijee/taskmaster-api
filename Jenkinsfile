@@ -34,13 +34,14 @@ pipeline {
         stage('Deploy Locally') {
             steps {
                 script {
-                    // This command tells Docker Compose to recreate the containers 
-                    // using the fresh images Jenkins just built.
-                    sh "docker compose up -d"
+                    // Use the hyphenated version which is standard for the 'docker-compose' package
+                    sh "docker-compose up -d"
                     echo "Deployment Complete! Containers are now running the latest code."
                 }
             }
         }
+
+        
     }
 
     post {
