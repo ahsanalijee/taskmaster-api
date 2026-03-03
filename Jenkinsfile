@@ -89,8 +89,21 @@ pipeline {
                     sleep 10
                     
                     echo "Performing Smoke Test (Vitals Check)..."
-                    // Hits the API to ensure it returns a successful status code
-                    sh "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 || echo 'Smoke Test Failed!'"
+                    
+                    // 1. We capture the HTTP status code into a variable
+                    def httpStatus = sh(
+                        script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080", 
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "API returned HTTP Status: ${httpStatus}"
+                    
+                    // 2. We explicitly fail the build if it's not 200
+                    if (httpStatus != "200") {
+                        error("Smoke Test Failed! Expected 200 OK, but got ${httpStatus}")
+                    } else {
+                        echo "Smoke Test Passed! Application is healthy."
+                    }
                 }
             }
         }
