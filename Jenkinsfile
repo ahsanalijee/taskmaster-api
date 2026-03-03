@@ -98,7 +98,7 @@ pipeline {
                     // 1. Test the Backend API (Port 8080)
                     echo "Testing Backend API (/health)..."
                     def apiStatus = sh(
-                        script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/health", 
+                        script: "curl -L -s -o /dev/null -w '%{http_code}' http://localhost:8080/health", 
                         returnStdout: true
                     ).trim()
                     
