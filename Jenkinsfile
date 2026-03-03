@@ -111,7 +111,7 @@ pipeline {
                     // 2. Test the Frontend Web Server (Port 80)
                     echo "Testing Frontend Web Server..."
                     def webStatus = sh(
-                        script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8081",
+                        script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8082",
                         returnStdout: true
                     ).trim()
                     
