@@ -39,11 +39,13 @@ pipeline {
                     sh "trivy image --severity HIGH,CRITICAL --exit-code 0 ${DOCKER_USER}/taskmaster-api:latest"
                     sh "trivy image --severity HIGH,CRITICAL --exit-code 0 ${DOCKER_USER}/taskmaster-web:latest"
 
-                    // 4. Archive the HTML files so they appear on the Build page
-                    archiveArtifacts artifacts: '*.html', fingerprint: true
+                    // Always archive so we can see the results even if the build fails later
+                    archiveArtifacts artifacts: '*.html', allowEmptyArchive: true
                 }
             }
         }
+
+       
 
         stage('Push to Docker Hub') {
             steps {
