@@ -19,16 +19,17 @@ pipeline {
                 script {
                     echo "Installing dependencies and running PHPUnit..."
                     
-                    // 1. Install Composer dependencies inside a temporary container
-                    sh "docker run --rm -v ${WORKSPACE}:/app -w /app composer install --ignore-platform-reqs"
+                    // 1. We use --volumes-from to share the exact same files Jenkins sees.
+                    // 2. We set the working directory (-w) to the current Jenkins Workspace path.
+                    sh "docker run --rm --volumes-from jenkins-server -w \"${WORKSPACE}\" composer install --ignore-platform-reqs"
                     
-                    // 2. Run PHPUnit tests. The '|| true' ensures the build continues even if tests fail for now.
-                    sh "docker run --rm -v ${WORKSPACE}:/app -w /app php:8.2-cli vendor/bin/phpunit --configuration phpunit.xml || true"
+                    // 3. We do the same for PHPUnit
+                    sh "docker run --rm --volumes-from jenkins-server -w \"${WORKSPACE}\" php:8.2-cli vendor/bin/phpunit --configuration phpunit.xml || true"
                 }
             }
             post {
                 always {
-                    // Generates the Test Result trend graph on your Jenkins dashboard
+                    // Generates the Test Result trend graph
                     junit testResults: 'build/report.xml', allowEmptyResults: true
                 }
             }
